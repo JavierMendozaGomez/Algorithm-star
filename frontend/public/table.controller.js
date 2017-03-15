@@ -40,6 +40,9 @@ function tableController($scope, $log, $http){
             $scope.cellColors[$scope.nodoFinal.i][$scope.nodoFinal.j] = ''
           $scope.nodoFinal = {i:i, j:j}
         }
+        else{
+                      $scope.celdas[i][j] = 2
+        }
       }
 
       $scope.getFils = function(){

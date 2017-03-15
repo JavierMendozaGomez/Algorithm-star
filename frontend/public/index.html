@@ -16,12 +16,15 @@
         <button type="button" name="button" ng-click="class = 'bg-danger'" >Muro</button>
         <button type="button" name="button" ng-click="class = 'bg-primary'">Casilla de Inicio</button>
         <button type="button" name="button" ng-click="class = 'bg-warning'">Casilla de Finalizacion</button>
+        <button type="button" name="button" ng-click="class = 'bg-info'">Aumentar coste</button>
+
         <button type="button" name="button" ng-click="findPath()">Resuelve</button>
 
         <input type="text" ng-model="prueba" />
         <table class="table table-striped table-bordered" ng-init="loadTable()">
           <tr ng-repeat="i in getFils()">
-            <td ng-repeat="j in getCols()"  ng-click="changeClass(i,j)" ng-model="celdas[i][j]" ng-class="cellColors[i][j]">{{i}}{{j}} </td>
+            <td ng-repeat="j in getCols()"  ng-click="changeClass(i,j)"  ng-class="cellColors[i][j]">
+              <input type="number" ng-model="celdas[i][j]" placeholder={{i}}{{j}}></input> </td>
           </tr>
         </table>
     </div>
