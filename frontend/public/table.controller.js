@@ -5,9 +5,10 @@
      tableController.$inject = ["$scope", "$log", "$http"]
 
 function tableController($scope, $log, $http){
-      $scope.numFils = 10
-      $scope.numCols = 10
+      $scope.numFils = 8
+      $scope.numCols = 8
       $scope.class=''
+      $scope.existe = true;
 
       $scope.loadTable = function(){
 
@@ -24,6 +25,10 @@ function tableController($scope, $log, $http){
           for(let i = 0; i < $scope.numFils; i++){
                 $scope.cellColors[i] = new Array($scope.numCols)
           }
+
+          for(let i = 0; i < $scope.numFils;i++)
+              for(let j = 0; j < $scope.numCols;j++)
+                $scope.cellColors[i][j] = ''
       }
 
       $scope.changeClass = function(i,j){
@@ -41,7 +46,7 @@ function tableController($scope, $log, $http){
           $scope.nodoFinal = {i:i, j:j}
         }
         else{
-                      $scope.celdas[i][j] = 2
+              $scope.celdas[i][j] = 0
         }
       }
 
@@ -62,7 +67,7 @@ function tableController($scope, $log, $http){
       $scope.drawPath = function(matrix){
           for(let i = 0; i < $scope.numFils;i++){
             for(let j = 0; j < $scope.numCols;j++){
-              if(matrix[i][j] == 1)
+              if(matrix[i][j] == -1)
                 $scope.cellColors[i][j] = 'bg-success'
             }
           }
