@@ -2,14 +2,21 @@
   angular.
     module('myApp').
      controller('tableController', tableController)
-     tableController.$inject = ["$scope", "$log", "$http"]
+     tableController.$inject = ["$scope", "$log", "$http", "$timeout","$interval"]
 
-function tableController($scope, $log, $http){
+function tableController($scope, $log, $http, $timeout, $interval){
       $scope.numFils = 8
       $scope.numCols = 8
       $scope.class=''
       $scope.existe = true;
-
+      $scope.stoppedDrawPath;
+      var stop;
+      $scope.startDrawPath = function(){
+        stop = $interval(function(){console.log('LO hace')},3000)
+      }
+      $scope.stopDrawPath = function(){
+        $interval.cancel(stop)
+      }
       $scope.loadTable = function(){
 
           $scope.celdas = new Array($scope.numFils) // Indica si el nodo esta cerrado o no

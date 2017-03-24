@@ -76,16 +76,17 @@ function procesa(NodoPadre, i, j, iFin, jFin, matCerrados, listaAbiertos, numFil
 function getDistancia(iIni, jIni, iDestino, jDestino){
   return Math.sqrt(Math.pow((iDestino - iIni),2) + Math.pow((jDestino - jIni),2))
 }
-function dibujaCamino(nodoFin,matCerrados,matPadres, numFils, numCols,callback){
+function dibujaCamino(nodoFin,matCerrados,matPadres, numFils, numCols, camino, callback){
   matCerrados = new Array(numFils) // Indica si el nodo esta cerrado o no
   for(var i = 0; i < numFils; i++){
         matCerrados[i] = new Array(numCols)
   }
   while(nodoFin != null){
     matCerrados[nodoFin.i][nodoFin.j] = -1
+    camino.push({i:nodoFin.i, j : nodoFin.j})
     nodoFin = matPadres[nodoFin.i][nodoFin.j]
   }
-
+  camino = camino.reverse();
   return callback(null,matCerrados)
 }
 
@@ -104,12 +105,13 @@ exports.handler = function(event, context, result) {
          matPadres[i] = new Array(numCols)
 
  procesa(nodoInicial,nodoInicial.i, nodoInicial.j, nodoFin.i, nodoFin.j, matCerrados, listaAbiertos, numFils , numCols, matPadres, function(err,response){
+          var camino = []
           if(err){
           console.log(err)
           result(err)
           }
           else{
-            dibujaCamino(nodoFin, matCerrados, response, numFils, numCols,function(err,data){
+            dibujaCamino(nodoFin, matCerrados, response, numFils, numCols, camino, function(err,data){
               if(data){
                   for(var i = 0; i < numFils; i++){   //Imprimimos la matriz
                     for(var j = 0; j < numCols;j++){
@@ -120,7 +122,7 @@ exports.handler = function(event, context, result) {
                     console.log(linea)
                     linea = ''
                   }
-                  result(null,data)
+                  result(null,camino)
               }
 
              })
