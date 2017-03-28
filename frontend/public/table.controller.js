@@ -10,12 +10,10 @@ function tableController($scope, $log, $http, $timeout, $interval){
       $scope.class=''
       $scope.existe = true;
       $scope.stoppedDrawPath;
-      var stop;
-      $scope.startDrawPath = function(){
-        stop = $interval(function(){console.log('LO hace')},3000)
-      }
+      var listOfStops = [];
       $scope.stopDrawPath = function(){
-        $interval.cancel(stop)
+        for(var i = 0; i < listOfStops.length;i++)
+            $timeout.cancel(listOfStops[i])
       }
       $scope.loadTable = function(){
 
@@ -41,7 +39,7 @@ function tableController($scope, $log, $http, $timeout, $interval){
       $scope.changeClass = function(i,j){
           $scope.cellColors[i][j] = $scope.class
           if($scope.class == 'bg-danger')
-            $scope.celdas[i][j] = 1
+            $scope.celdas[i][j] = -1
           else if($scope.class == 'bg-primary'){
             if($scope.nodoInicial)
               $scope.cellColors[$scope.nodoInicial.i][$scope.nodoInicial.j] = ''
@@ -71,13 +69,14 @@ function tableController($scope, $log, $http, $timeout, $interval){
         return list;
       }
 
-      $scope.drawPath = function(matrix){
-          for(let i = 0; i < $scope.numFils;i++){
-            for(let j = 0; j < $scope.numCols;j++){
-              if(matrix[i][j] == -1)
-                $scope.cellColors[i][j] = 'bg-success'
+      $scope.drawPath = function(camino){
+          var time = 1500;
+          for(let k = 0; k < camino.length;k++){
+                let celda = camino[k]
+                var stop = $timeout(function(){$scope.cellColors[celda.i][celda.j] = 'bg-success'; $scope.nodoInicial.i = celda.i; $scope.nodoInicial.j = celda.j}, time)
+                listOfStops.push(stop)
+                time = time + 1500;
             }
-          }
 
       }
 
@@ -90,6 +89,7 @@ function tableController($scope, $log, $http, $timeout, $interval){
           numCols:$scope.numCols,
           matMuros:$scope.celdas
         }).then(function(response) {
+            console.log('respuesta')
             console.log(response.data)
             $scope.drawPath(response.data)
         });
