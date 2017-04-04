@@ -1,4 +1,4 @@
-var Nodo = require('./Nodo.js')
+  var Nodo = require('./Nodo.js')
 
 function esFactible(i, j, matCerrados, numFils, numCols){ // Devuelve true si el nodo no está en la lista de cerrados y se puede recorrer dicha casilla
   return !(i < 0 || i == numFils || j < 0 || j == numCols || matCerrados[i][j] == -1)
@@ -8,10 +8,10 @@ function getDistancia(iIni, jIni, iDestino, jDestino){
   return Math.sqrt(Math.pow((iDestino - iIni),2) + Math.pow((jDestino - jIni),2))
 }
 
-function procesaNodo(listaAbiertos, nodoPadre, i, j, iFin, jFin, matPadres, matCerrados){
+function procesaNodo(listaAbiertos, nodoN, i, j, iFin, jFin, matPadres, matCerrados){
     var nodoEncontrado = listaAbiertos.find(nodo => nodo.i === i && nodo.j === j)
-    var nuevaG = getDistancia(nodoPadre.i, nodoPadre.j, i, j) + matCerrados[i][j];
-    var nuevoPadre = nodoPadre;
+    var nuevaG = getDistancia(nodoN.i, nodoN.j, i, j) + matCerrados[i][j];
+    var nuevoPadre = nodoN;
     var H = getDistancia(i,j,iFin,jFin)
 
     if(nodoEncontrado){//Si el nodo ya existia en la lista de abiertos
@@ -26,8 +26,15 @@ function procesaNodo(listaAbiertos, nodoPadre, i, j, iFin, jFin, matPadres, matC
   }
 
 function procesa(NodoPadre, i, j, iFin, jFin, matCerrados, listaAbiertos, numFils, numCols, matPadres, callback){
-  try{
-  if(esFactible(i-1, j, matCerrados, numFils, numCols))
+  while(listaAbiertos.length > 0){
+   listaAbiertos.sort((nodo1,nodo2) => (nodo2.G + nodo2.H ) < (nodo1.G + nodo1.H))  // lo ordenamos decrecientemente
+   matCerrados[listaAbiertos[0].i][listaAbiertos[0].j] = -1 // Lo añadimos a lista de cerrados
+   var nodoN = listaAbiertos.shift() // Lo eliminamos de la lista de abiertos
+  if(NodoPadre.i  == iFin && NodoPadre.j == jFin) // Si es el nodoFin
+      return callback(null,matPadres)  // Se ha encontrado el camino
+  i = nodoN.i
+  j = nodoN.j
+  if(esFactible(i-1, j, matCerrados, numFils, numCols)) // Si este sucesor no esta en la lista cerrada
       procesaNodo(listaAbiertos, NodoPadre, i-1, j, iFin,jFin, matPadres, matCerrados)
 
   if(esFactible(i-1, j+1, matCerrados, numFils, numCols))
@@ -51,38 +58,18 @@ function procesa(NodoPadre, i, j, iFin, jFin, matCerrados, listaAbiertos, numFil
   if(esFactible(i-1, j-1, matCerrados, numFils, numCols))
     procesaNodo(listaAbiertos, NodoPadre, i-1, j-1, iFin,jFin, matPadres, matCerrados)
 
-  if(i+1 == iFin && j == jFin ||
-    i+1 == iFin && j+1 == jFin ||
-    i == iFin && j+1 == jFin ||
-    i-1 == iFin && j+1 == jFin ||
-    i-1 == iFin && j == jFin ||
-    i-1 == iFin && j-1 == jFin ||
-    i+1 == iFin && j-1 == jFin ||
-    i+1 == iFin && j-1 == jFin){
-      matCerrados[iFin][jFin] = -1
-     return callback(null,matPadres)
-    }
-    listaAbiertos.sort((nodo1,nodo2) => (nodo2.G + nodo2.H ) < (nodo1.G + nodo1.H))  // lo ordenamos decrecientemente
-    matCerrados[listaAbiertos[0].i][listaAbiertos[0].j] = -1 // Lo añadimos a lista de cerrados
-    NodoPadre = listaAbiertos.shift()
-    procesa(NodoPadre, NodoPadre.i, NodoPadre.j , iFin,jFin,matCerrados, listaAbiertos, numFils, numCols, matPadres, callback)
   }
-  catch(e){
-   return callback('No existe ningun camino posible')
-  }
+   return callback('No existe camino')
 }
+
 
 
 function getDistancia(iIni, jIni, iDestino, jDestino){
   return Math.sqrt(Math.pow((iDestino - iIni),2) + Math.pow((jDestino - jIni),2))
 }
 function dibujaCamino(nodoFin,matCerrados,matPadres, numFils, numCols, camino, callback){
-  matCerrados = new Array(numFils) // Indica si el nodo esta cerrado o no
-  for(var i = 0; i < numFils; i++){
-        matCerrados[i] = new Array(numCols)
-  }
   while(nodoFin != null){
-    matCerrados[nodoFin.i][nodoFin.j] = -1
+    console.log(nodoFin.i  + " " + nodoFin.j)
     camino.push({i:nodoFin.i, j : nodoFin.j})
     nodoFin = matPadres[nodoFin.i][nodoFin.j]
   }
@@ -97,8 +84,8 @@ exports.handler = function(event, context, result) {
   var nodoFin = new Nodo(event.nodoFinal.i, event.nodoFinal.j,0,0,null)
   var nodoInicial = new Nodo(event.nodoInicial.i, event.nodoInicial.j, getDistancia(event.nodoInicial.i,event.nodoInicial.j, event.nodoFinal.i, event.nodoFinal.j),null)
   var matCerrados = event.matMuros
-  matCerrados[nodoInicial.i][nodoInicial.j] = -1
-  var listaAbiertos = []
+
+  var listaAbiertos = [nodoInicial]
   var linea = ''
   var matPadres = new Array(numFils) //  Hace referencia al padre del nodo
      for(var i = 0; i < numFils; i++)
