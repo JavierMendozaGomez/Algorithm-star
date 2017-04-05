@@ -10,14 +10,14 @@ function getDistancia(iIni, jIni, iDestino, jDestino){
 
 function procesaNodo(listaAbiertos, nodoN, i, j, iFin, jFin, matPadres, matCerrados){
     var nodoEncontrado = listaAbiertos.find(nodo => nodo.i === i && nodo.j === j)
-    var nuevaG = getDistancia(nodoN.i, nodoN.j, i, j) + matCerrados[i][j];
+    var nuevaG = nodoN.G + getDistancia(nodoN.i, nodoN.j, i, j) + matCerrados[i][j];
     var nuevoPadre = nodoN;
     var H = getDistancia(i,j,iFin,jFin)
 
     if(nodoEncontrado){//Si el nodo ya existia en la lista de abiertos
       if(nuevaG > nodoEncontrado.G){ // Comprobamos de que la nueva ruta no es superior a la ya existente
           nuevaG = nodoEncontrado.G  // se mantienen los nodos anteriores
-          nuevoPadre = nodoEncontrado
+          nuevoPadre = matPadres[i][j] //Se mantiene el padre anterior
        }
       listaAbiertos = listaAbiertos.filter(item => item !== nodoEncontrado); //lo elimino de la lista
     }
@@ -30,33 +30,33 @@ function procesa(NodoPadre, i, j, iFin, jFin, matCerrados, listaAbiertos, numFil
    listaAbiertos.sort((nodo1,nodo2) => (nodo2.G + nodo2.H ) < (nodo1.G + nodo1.H))  // lo ordenamos decrecientemente
    matCerrados[listaAbiertos[0].i][listaAbiertos[0].j] = -1 // Lo añadimos a lista de cerrados
    var nodoN = listaAbiertos.shift() // Lo eliminamos de la lista de abiertos
-  if(NodoPadre.i  == iFin && NodoPadre.j == jFin) // Si es el nodoFin
+  if(nodoN.i  == iFin && nodoN.j == jFin) // Si es el nodoFin
       return callback(null,matPadres)  // Se ha encontrado el camino
   i = nodoN.i
   j = nodoN.j
   if(esFactible(i-1, j, matCerrados, numFils, numCols)) // Si este sucesor no esta en la lista cerrada
-      procesaNodo(listaAbiertos, NodoPadre, i-1, j, iFin,jFin, matPadres, matCerrados)
+      procesaNodo(listaAbiertos, nodoN, i-1, j, iFin,jFin, matPadres, matCerrados)
 
   if(esFactible(i-1, j+1, matCerrados, numFils, numCols))
-    procesaNodo(listaAbiertos, NodoPadre, i-1, j+1, iFin,jFin, matPadres, matCerrados)
+    procesaNodo(listaAbiertos, nodoN, i-1, j+1, iFin,jFin, matPadres, matCerrados)
 
   if(esFactible(i, j+1, matCerrados, numFils, numCols))
-    procesaNodo(listaAbiertos, NodoPadre, i, j+1, iFin,jFin, matPadres, matCerrados)
+    procesaNodo(listaAbiertos, nodoN, i, j+1, iFin,jFin, matPadres, matCerrados)
 
   if(esFactible(i+1, j+1, matCerrados, numFils, numCols))
-    procesaNodo(listaAbiertos, NodoPadre, i+1, j+1, iFin,jFin, matPadres, matCerrados)
+    procesaNodo(listaAbiertos, nodoN, i+1, j+1, iFin,jFin, matPadres, matCerrados)
 
   if(esFactible(i+1, j, matCerrados, numFils, numCols))
-    procesaNodo(listaAbiertos, NodoPadre, i+1, j, iFin,jFin, matPadres, matCerrados)
+    procesaNodo(listaAbiertos, nodoN, i+1, j, iFin,jFin, matPadres, matCerrados)
 
   if(esFactible(i+1, j-1, matCerrados, numFils, numCols))
-    procesaNodo(listaAbiertos, NodoPadre, i+1, j-1, iFin,jFin, matPadres, matCerrados)
+    procesaNodo(listaAbiertos, nodoN, i+1, j-1, iFin,jFin, matPadres, matCerrados)
 
   if(esFactible(i, j-1, matCerrados, numFils, numCols))
-    procesaNodo(listaAbiertos, NodoPadre, i, j-1, iFin,jFin, matPadres, matCerrados)
+    procesaNodo(listaAbiertos, nodoN, i, j-1, iFin,jFin, matPadres, matCerrados)
 
   if(esFactible(i-1, j-1, matCerrados, numFils, numCols))
-    procesaNodo(listaAbiertos, NodoPadre, i-1, j-1, iFin,jFin, matPadres, matCerrados)
+    procesaNodo(listaAbiertos, nodoN, i-1, j-1, iFin,jFin, matPadres, matCerrados)
 
   }
    return callback('No existe camino')
@@ -82,7 +82,7 @@ exports.handler = function(event, context, result) {
   var numFils = event.numFils
   var numCols = event.numCols
   var nodoFin = new Nodo(event.nodoFinal.i, event.nodoFinal.j,0,0,null)
-  var nodoInicial = new Nodo(event.nodoInicial.i, event.nodoInicial.j, getDistancia(event.nodoInicial.i,event.nodoInicial.j, event.nodoFinal.i, event.nodoFinal.j),null)
+  var nodoInicial = new Nodo(event.nodoInicial.i, event.nodoInicial.j,0,null)
   var matCerrados = event.matMuros
 
   var listaAbiertos = [nodoInicial]
